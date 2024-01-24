@@ -1,3 +1,4 @@
 Rails.application.routes.draw do
-  root to: 'game#index'
+  root to: 'games#index'
+  post '/initialize_game', to: 'games#initialize_game'
 end

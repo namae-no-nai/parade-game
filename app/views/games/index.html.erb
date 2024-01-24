@@ -1,0 +1,11 @@
+<h3>Escolha o numero de jogadores</h3>
+<form action="<%= initialize_game_path %>" method="post">
+  <label for="game_number_of_players">Choose a number:</label>
+  <select name="game[number_of_players]" id="game_number_of_players">
+    <% (2..6).each do |number| %>
+      <option value="<%= number %>"><%= number %></option>
+    <% end %>
+  </select>
+  
+  <input type="submit" value="Submit">
+</form>
