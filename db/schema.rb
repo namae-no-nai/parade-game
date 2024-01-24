@@ -32,6 +32,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_23_003525) do
     t.string "owner_type", null: false
     t.bigint "owner_id", null: false
     t.bigint "card_id", null: false
+    t.string "place", default: "Deck", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["card_id"], name: "index_player_cards_on_card_id"
