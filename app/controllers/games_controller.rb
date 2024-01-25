@@ -11,15 +11,15 @@ DRAW_CARD = 1
 	#criar, checo a quantidade, e inicio o jogo
 
 	def initialize_game
-		shuffled_deck = Card.all.shuffle
-		players = create_players
-		players.each do |player|
-			shuffled_deck.pop(INITIAL_HAND).each do |card|
+		@shuffled_deck = Card.all.shuffle
+		@players = create_or_find_players
+		@players.each do |player|
+			@shuffled_deck.pop(INITIAL_HAND).each do |card|
 				player.player_cards.create!(card: card, place:'Hand')
 			end
 		end
 		make_parade
-		middle_game
+		render :game, status: 302
 	end
 
 	def middle_game
@@ -30,9 +30,10 @@ DRAW_CARD = 1
 		# compra uma carta
 	end
 
-	def create_players
-		game_params[:number_of_players]
-		#ask for name and create these many players
+	def create_or_find_players
+		game_params[:players].map do |player|
+			Player.find_or_create_by!(name: player)
+		end
 	end
 
 	def player_turn(player)
@@ -68,17 +69,17 @@ DRAW_CARD = 1
 	end
 
 	private def draw_card
-		player.hand_cards.concat(shuffled_deck.pop(DRAW_CARD))
+		player.hand_cards.concat(@shuffled_deck.pop(DRAW_CARD))
 	end
 
 	private def make_parade
 		@board = Board.create!
-		@shuffle_deck.pop(INITIAL_PARADE).each do |card|
+		@shuffled_deck.pop(INITIAL_PARADE).each do |card|
 			@board.player_cards.create!(card:, place: 'Board')
 		end
 	end
 
   private def game_params
-    params.require(:game).permit(:number_of_players)
+    params.require(:game).permit(players: [])
   end
 end
