@@ -28,6 +28,12 @@ DRAW_CARD = 1
 		# verificar se tem uma carta de cada naipe ou não há mais cartas no deck
 		# se sim fim de jogo, se não jogo continua
 		# compra uma carta
+		player_turn
+
+		next_player
+	end
+
+	def last_round
 	end
 
 	def create_players
@@ -39,7 +45,24 @@ DRAW_CARD = 1
 		card = select_card(player)
 		push_into_parade(card)
 		retrieve_cards_to_table(card)
+		if @deck.is_zero? || all_suits
+			last_round
+		end
 		draw_card
+	end
+
+	def last_round
+		card = select_card(player)
+		push_into_parade(card)
+		retrieve_cards_to_table(card)
+		choose_last_two_cards
+
+		next_player
+	end
+
+	def choose_last_two_cards
+		#escolhe 2 cards e encerra o jogo para o jogador
+		#ainda pensando em como fazer isso, com tempo mas sem foco hoje T_T
 	end
 
 	def select_card(player)
