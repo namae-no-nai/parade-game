@@ -11,7 +11,6 @@ DRAW_CARD = 1
 	#criar, checo a quantidade, e inicio o jogo
 
 	def initialize_game
-		debugger
 		@deck = Card.shuffled_deck
 		#somehow ask for names before this point
 		@players = Player.create_players_for_game(game_params[:number_of_players].to_i, @deck, INITIAL_HAND)
