@@ -27,7 +27,10 @@ DRAW_CARD = 1
 		# compra uma carta
 		player_turn
 
-		next_player
+	def create_or_find_players
+		game_params[:players].map do |player|
+			Player.find_or_create_by!(name: player)
+		end
 	end
 
 	def next_player;end
@@ -86,10 +89,17 @@ DRAW_CARD = 1
 	end
 
 	private def draw_card
-		player.hand_cards.concat(shuffled_deck.pop(DRAW_CARD))
+		player.hand_cards.concat(@shuffled_deck.pop(DRAW_CARD))
+	end
+
+	private def make_parade
+		@board = Board.create!
+		@shuffled_deck.pop(INITIAL_PARADE).each do |card|
+			@board.player_cards.create!(card:, place: 'Board')
+		end
 	end
 
   private def game_params
-    params.require(:game).permit(:number_of_players)
+    params.require(:game).permit(players: [])
   end
 end

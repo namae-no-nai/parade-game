@@ -1,0 +1,18 @@
+<div class="players">
+  <% @players.each do |player| %>
+    <div class="player">
+      <h3>Player: <%= player.name %></h3>
+
+      <div class="playerCards">
+        <% player.cards.each do |card| %>
+          <div class="card" style="border: 1px solid black;">
+            <p>Suit: <%= card.suit %></p>
+            <p>Value: <%= card.value %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <hr>
+  <% end %>
+</div>
