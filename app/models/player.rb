@@ -4,12 +4,11 @@ class Player < ApplicationRecord
 	has_many :cards, through: :player_cards
 
 
-	def self.create_players_for_game(number_of_players, deck, hand)
+	def self.create_players_for_game(players_names, deck, hand)
     players = []
-
-    number_of_players.to_i.times do |index|
-      player = Player.create(name: "Player #{index + 1}")
-      players << player
+    debugger
+    players_names.map do |player_name|
+      players <<  Player.find_or_create_by!(name: player_name)
     end
 
     players.each do |player|

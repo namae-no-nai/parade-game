@@ -13,7 +13,7 @@ DRAW_CARD = 1
 	def initialize_game
 		@deck = Card.shuffled_deck
 		#somehow ask for names before this point
-		@players = Player.create_players_for_game(game_params[:number_of_players].to_i, @deck, INITIAL_HAND)
+		@players = Player.create_players_for_game(game_params[:players], @deck, INITIAL_HAND)
 		@board = Board.create_with_initial_parade(@deck, INITIAL_PARADE)
 		# looking passable at this point
 		middle_game
@@ -26,11 +26,6 @@ DRAW_CARD = 1
 		# se sim fim de jogo, se não jogo continua
 		# compra uma carta
 		player_turn
-
-	def create_or_find_players
-		game_params[:players].map do |player|
-			Player.find_or_create_by!(name: player)
-		end
 	end
 
 	def next_player;end
@@ -90,13 +85,6 @@ DRAW_CARD = 1
 
 	private def draw_card
 		player.hand_cards.concat(@shuffled_deck.pop(DRAW_CARD))
-	end
-
-	private def make_parade
-		@board = Board.create!
-		@shuffled_deck.pop(INITIAL_PARADE).each do |card|
-			@board.player_cards.create!(card:, place: 'Board')
-		end
 	end
 
   private def game_params
