@@ -12,11 +12,10 @@ DRAW_CARD = 1
 
 	def initialize_game
 		@deck = Card.shuffled_deck
-		#somehow ask for names before this point
 		@players = Player.create_players_for_game(game_params[:players], @deck, INITIAL_HAND)
 		@board = Board.create_with_initial_parade(@deck, INITIAL_PARADE)
-		# looking passable at this point
-		middle_game
+		# middle_game
+		render :game, status: 302
 	end
 
 	def middle_game
