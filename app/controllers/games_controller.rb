@@ -11,15 +11,12 @@ DRAW_CARD = 1
 	#criar, checo a quantidade, e inicio o jogo
 
 	def initialize_game
-		@shuffled_deck = Card.all.shuffle
-		@players = create_or_find_players
-		@players.each do |player|
-			@shuffled_deck.pop(INITIAL_HAND).each do |card|
-				player.player_cards.create!(card: card, place:'Hand')
-			end
-		end
-		make_parade
-		render :game, status: 302
+		@deck = Card.shuffled_deck
+		#somehow ask for names before this point
+		@players = Player.create_players_for_game(game_params[:number_of_players].to_i, @deck, INITIAL_HAND)
+		@board = Board.create_with_initial_parade(@deck, INITIAL_PARADE)
+		# looking passable at this point
+		middle_game
 	end
 
 	def middle_game
