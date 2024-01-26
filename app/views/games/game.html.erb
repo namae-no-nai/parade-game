@@ -3,7 +3,7 @@
     <div class="player">
       <h3>Player: <%= player.name %></h3>
 
-      <div class="playerCards">
+      <div class="playerCards" style=" display: flex; flex-direction: column; justify-content: center;">
         <% player.cards.each do |card| %>
           <div class="card" style="border: 1px solid black;">
             <p>Suit: <%= card.suit %></p>
