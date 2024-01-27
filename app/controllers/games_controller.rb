@@ -50,12 +50,12 @@ class GamesController < ApplicationController
 
   private def retrieve_cards_to_table
     card = PlayerCard.find(game_params[:card_id]).card
-    return joker if card.value.to_i.zero?
+    return joker if card.value.zero?
 
     @board = Board.find(game_params[:board_id])
-    return if @board.player_cards.length <= card.value.to_i
+    return if @board.player_cards.length <= card.value
 
-    compare_cards(card:, retriavable_cards: @board.player_cards[(card.value.to_i + 1)..])
+    compare_cards(card:, retriavable_cards: @board.player_cards[(card.value + 1)..])
   end
 
   private def joker
@@ -66,7 +66,7 @@ class GamesController < ApplicationController
 
   private def compare_cards(card:, retriavable_cards:)
     retriavable_cards.each do |retriavable_card|
-      if retriavable_card.suit == card.suit || retriavable_card.value.to_i <= card.value.to_i
+      if retriavable_card.suit == card.suit || retriavable_card.value <= card.value
         retriavable_card.update!(owner: @player, place: 'Table')
       end
     end

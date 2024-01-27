@@ -23,7 +23,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_27_011021) do
 
   create_table "cards", force: :cascade do |t|
     t.string "suit"
-    t.string "value"
+    t.integer "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
