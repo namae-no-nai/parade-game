@@ -1,5 +1,5 @@
 <div class="players flex justify-evenly flex-wrap mt-5" data-controller="game">
-  <% @game.players.each do |player| %>
+  <% @players.each do |player| %>
     <div class="player border rounded p-2" data-player-id="<%= player.id %>">
       <h3 class="font-bold"><%= player.name %></h3>
 
@@ -12,7 +12,17 @@
         <% end %>
       </div>
     </div>
-
+    
     <hr>
-  <% end %>
+    <% end %>
+    </div>
+<div class="board flex justify-center items-center flex-wrap mt-5" data-controller="game">
+    <div class="boardCards flex mt-5">
+    <% @board.player_cards.each do |player_card| %>
+      <div data-action="click->game#selectPlayerCard" data-player-card-id="<%= player_card.id %>" class="player-card p-1 card border hover:bg-purple-500 hover:cursor-pointer">
+        <p>Suit: <%= player_card.card.suit %></p>
+        <p>Value: <%= player_card.card.value %></p>
+      </div>
+    <% end %>
+  </div>
 </div>

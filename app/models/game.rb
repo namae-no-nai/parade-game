@@ -9,6 +9,11 @@ class Game < ApplicationRecord
   has_many :player_cards, as: :owner
   has_many :cards, through: :player_cards
 
+  scope :with_associations, ->(id) {
+    includes(:board, :player_cards, players: { player_cards: :card })
+      .find(id)
+  }
+
   INITIAL_HAND = 5
   INITIAL_PARADE = 6
   DRAW_CARD = 1

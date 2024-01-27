@@ -19,7 +19,9 @@ class GamesController < ApplicationController
   end
 
   def game
-    @game = Game.includes(:board, :player_cards, players: { player_cards: :card }).find(params[:id])
+    game = Game.with_associations(params[:id])
+    @players = game.players
+    @board = game.board
   end
 
   def middle_game
