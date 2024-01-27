@@ -28,6 +28,11 @@ class Game < ApplicationRecord
     create_initial_board
   end
 
+  def draw_card(player)
+    drawed_card = self.player_cards.first
+    drawed_card.update(owner: player, place: 'Hand')
+  end
+
   private
 
   def initialize_deck

@@ -77,8 +77,7 @@ class GamesController < ApplicationController
   end
 
   private def draw_card
-    drawed_card = @game.player_cards.first
-    drawed_card.update(owner: @player, place: 'Hand')
+    @game.draw_card(@player)
   end
 
   def next_player;end
