@@ -6,7 +6,6 @@ class Player < ApplicationRecord
 
 	def self.create_players_for_game(players_names, deck, hand)
     players = []
-    debugger
     players_names.map do |player_name|
       players <<  Player.find_or_create_by!(name: player_name)
     end
