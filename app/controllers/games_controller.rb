@@ -73,7 +73,7 @@ class GamesController < ApplicationController
   end
 
   private def all_suits?
-    @player.player_cards.on_table.group_by(&:suit).count == 6
+    @player.all_suits?
   end
 
   private def draw_card
