@@ -1,19 +1,19 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ["playerCard"];
+  static targets = ["playerCard", "board"];
 
   selectPlayerCard(event) {
-    const board = document.getElementsByClassName('board');
-    const boardId = board[0].dataset.boardId;
-    console.log(boardId)
+    const board = this.boardTarget;
+    const boardId = board.dataset.boardId;
+
     const playerCard = event.target.closest("div.player-card");
     const playerCardId = playerCard.dataset.playerCardId;
 
     const player = playerCard.closest("div.player");
     const playerId = player.dataset.playerId;
+
     const gameId = new URL(window.location.href).pathname.split('/').pop();
-    // console.log(boardId)
     this.sendPostRequest(gameId, playerCardId, playerId, boardId);
   }
 
@@ -29,13 +29,13 @@ export default class extends Controller {
         },
         body: JSON.stringify({
           game: {
-          card_id: playerCardId,
-          player_id: playerId,
-          board_id: boardId
-        }
-      }),
+            card_id: playerCardId,
+            player_id: playerId,
+            board_id: boardId
+          }
+        }),
       });
-      console.log(response)
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }

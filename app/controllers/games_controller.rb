@@ -38,12 +38,20 @@ class GamesController < ApplicationController
   def last_round; end
 
   def player_turn
+    @game = Game.find(params[:id])
+    @player = Player.find(game_params[:player_id])
+
     push_into_parade
     retrieve_cards_to_table
-      if @deck.is_zero? || all_suits
-      last_round
-    end
+
+    deck = @game.player_cards
+    last_round if deck.empty? || all_suits?
+
     draw_card
+
+    @players = @game.players
+    @board = @game.board
+    render :game
   end
 
   def last_round
@@ -72,9 +80,11 @@ class GamesController < ApplicationController
   private def retrieve_cards_to_table
     card = PlayerCard.find(game_params[:card_id]).card
     return joker if card.value.to_i.zero?
+
     @board = Board.find(game_params[:board_id])
     return if @board.player_cards.length <= card.value.to_i
-    compare_cards(card:, retriavable_cards:  @board.player_cards[..(-card.value.to_i-1)])
+
+    compare_cards(card:, retriavable_cards: @board.player_cards[(card.value.to_i + 1)..])
   end
 
   def joker
@@ -84,15 +94,20 @@ class GamesController < ApplicationController
   end
 
   private def compare_cards(card:, retriavable_cards:)
-    #fixing this code now
-    unretriavable_cards = @board.player_cards[0..card.value.to_i-1]
-    retrievable_cards.reject! { |participant| player.table_cards << participant  if participant.suit == card[:suit] }
-    retrievable_cards.reject! { |participant| player.table_cards << participant  if participant.value <= card[:suit] }
-    parade = unretriavable_cards + retrievable_cards
+    retriavable_cards.each do |retriavable_card|
+      if retriavable_card.suit == card.suit || retriavable_card.value.to_i <= card.value.to_i
+        retriavable_card.update!(owner: @player, place: 'Table')
+      end
+    end
+  end
+
+  private def all_suits?
+    @player.player_cards.on_table.group_by(&:suit).count == 6
   end
 
   private def draw_card
-    player.hand_cards.concat(@shuffled_deck.pop(DRAW_CARD))
+    drawed_card = @game.player_cards.first
+    drawed_card.update(owner: @player, place: 'Hand')
   end
 
   private def game_params

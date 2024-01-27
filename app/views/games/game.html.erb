@@ -4,8 +4,17 @@
       <h3 class="font-bold"><%= player.name %></h3>
 
       <div class="playerCards grid grid-cols-2 mt-2">
-        <% player.player_cards.each do |player_card| %>
+        <% player.player_cards.on_hand.each do |player_card| %>
           <div data-action="click->game#selectPlayerCard" data-player-card-id="<%= player_card.id %>" class="player-card p-1 card border hover:bg-purple-500 hover:cursor-pointer">
+            <p>Suit: <%= player_card.card.suit %></p>
+            <p>Value: <%= player_card.card.value %></p>
+          </div>
+        <% end %>
+
+        <hr>
+        <p>On table</p>
+        <% player.player_cards.on_table.each do |player_card| %>
+          <div data-player-card-id="<%= player_card.id %>" class="player-card p-1 card border hover:bg-green-500">
             <p>Suit: <%= player_card.card.suit %></p>
             <p>Value: <%= player_card.card.value %></p>
           </div>
@@ -14,10 +23,11 @@
     </div>
 
     <hr>
-    <% end %>
-    </div>
-<div class="board flex justify-center items-center flex-wrap flex-row-reverse mt-5 data-controller="game" data-board-id="<%= @board.id%>">
-    <div class="boardCards flex flex-row-reverse mt-5">
+  <% end %>
+</div>
+
+<div class="board flex justify-center items-center flex-wrap flex-row-reverse mt-5 data-controller="game" data-game-target="board" data-board-id="<%= @board.id%>">
+  <div class="boardCards flex flex-row-reverse mt-5">
     <% @board.player_cards.each do |player_card| %>
       <div class="board-card p-1 card border hover:bg-purple-500 hover:cursor-pointer">
         <p>Suit: <%= player_card.card.suit %></p>
