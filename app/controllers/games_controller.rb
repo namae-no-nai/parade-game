@@ -39,20 +39,20 @@ class GamesController < ApplicationController
 
   def player_turn
     push_into_parade
-    retrieve_cards_to_table(card)
-    if @deck.is_zero? || all_suits
+    retrieve_cards_to_table
+      if @deck.is_zero? || all_suits
       last_round
     end
     draw_card
   end
 
   def last_round
-    card = select_card(player)
-    push_into_parade(card)
-    retrieve_cards_to_table(card)
-    choose_last_two_cards
+    # card = select_card(player)
+    # push_into_parade(card)
+    # retrieve_cards_to_table(card)
+    # choose_last_two_cards
 
-    next_player
+    # next_player
   end
 
   def choose_last_two_cards
@@ -69,20 +69,23 @@ class GamesController < ApplicationController
     card_ownership.update(owner_id: game_params[:board_id], owner_type: 'Board')
   end
 
-  private def retrieve_cards_to_table(card)
-    return joker if card.value.is_zero?
-    return if @board.length <= card.value
+  private def retrieve_cards_to_table
+    card = PlayerCard.find(game_params[:card_id]).card
+    return joker if card.value.to_i.zero?
+    @board = Board.find(game_params[:board_id])
+    return if @board.player_cards.length <= card.value.to_i
     compare_cards(card:, retriavable_cards:  @board.player_cards[..(-card.value.to_i-1)])
   end
 
   def joker
     # here the player could choose any card to be added to his table cards
     # he wants once a card with value 0 was added to the parade
-    parade[..-1]
+    @board[..-1]
   end
 
   private def compare_cards(card:, retriavable_cards:)
-    unretriavable_cards = parade[0..card.value.to_i-1]
+    #fixing this code now
+    unretriavable_cards = @board.player_cards[0..card.value.to_i-1]
     retrievable_cards.reject! { |participant| player.table_cards << participant  if participant.suit == card[:suit] }
     retrievable_cards.reject! { |participant| player.table_cards << participant  if participant.value <= card[:suit] }
     parade = unretriavable_cards + retrievable_cards
