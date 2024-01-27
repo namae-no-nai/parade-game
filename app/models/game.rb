@@ -16,7 +16,6 @@ class Game < ApplicationRecord
 
   INITIAL_HAND = 5
   INITIAL_PARADE = 6
-  DRAW_CARD = 1
 
   def initialize_game(new_players)
     if new_players.size < 2 || new_players.size > 6
