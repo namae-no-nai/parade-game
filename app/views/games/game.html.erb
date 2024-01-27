@@ -16,10 +16,10 @@
     <hr>
     <% end %>
     </div>
-<div class="board flex justify-center items-center flex-wrap mt-5" data-controller="game">
+<div class="board flex justify-center items-center flex-wrap mt-5 data-controller="game" data-board-id="<%= @board.id%>">
     <div class="boardCards flex mt-5">
     <% @board.player_cards.each do |player_card| %>
-      <div data-action="click->game#selectPlayerCard" data-player-card-id="<%= player_card.id %>" class="player-card p-1 card border hover:bg-purple-500 hover:cursor-pointer">
+      <div class="board-card p-1 card border hover:bg-purple-500 hover:cursor-pointer">
         <p>Suit: <%= player_card.card.suit %></p>
         <p>Value: <%= player_card.card.value %></p>
       </div>

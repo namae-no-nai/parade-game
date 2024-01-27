@@ -37,9 +37,8 @@ class GamesController < ApplicationController
 
   def last_round; end
 
-  def player_turn(player)
-    card = select_card(player)
-    push_into_parade(card)
+  def player_turn
+    push_into_parade
     retrieve_cards_to_table(card)
     if @deck.is_zero? || all_suits
       last_round
@@ -65,8 +64,9 @@ class GamesController < ApplicationController
     player.player_cards
   end
 
-  private def push_into_parade(card)
-    @player.player_cards.card.update(owner: @board.id, owner_type: 'Board')
+  private def push_into_parade
+    card_ownership = PlayerCard.find(game_params[:card_id])
+    card_ownership.update(owner_id: game_params[:board_id], owner_type: 'Board')
   end
 
   private def retrieve_cards_to_table(card)
@@ -93,6 +93,6 @@ class GamesController < ApplicationController
   end
 
   private def game_params
-    params.require(:game).permit(players: [])
+    params.require(:game).permit(:card_id, :board_id, :player_id, players:[])
   end
 end
