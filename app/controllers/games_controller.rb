@@ -44,8 +44,10 @@ class GamesController < ApplicationController
   end
 
   private def push_into_parade
-    card_ownership = PlayerCard.find(game_params[:card_id])
-    card_ownership.update(owner_id: game_params[:board_id], owner_type: 'Board')
+    PlayerCard.card_ownership(
+        card_id:game_params[:card_id],
+        owner_id:game_params[:board_id]
+      )
   end
 
   private def retrieve_cards_to_table
