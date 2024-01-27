@@ -1,7 +1,5 @@
 class GamesController < ApplicationController
 
-  INITIAL_HAND = 5
-  INITIAL_PARADE = 6
   DRAW_CARD = 1
 
   def index
