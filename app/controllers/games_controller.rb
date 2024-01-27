@@ -1,5 +1,7 @@
 class GamesController < ApplicationController
 
+  before_action :set_game, only: %w[ game player_turn]
+
   def index
     @game = Game.new
   end
@@ -12,15 +14,10 @@ class GamesController < ApplicationController
     redirect_to game_path(@game)
   end
 
-  def game
-    game = Game.with_associations(params[:id])
-    @players = game.players
-    @board = game.board
-  end
+  def game; end
 
   def player_turn
-    @game = Game.find(params[:id])
-    @player = Player.find(game_params[:player_id])
+    @player = @players.find(game_params[:player_id])
 
     push_into_parade
     retrieve_cards_to_table
@@ -30,8 +27,6 @@ class GamesController < ApplicationController
 
     draw_card
 
-    @players = @game.players
-    @board = @game.board
     render :game
   end
 
@@ -46,10 +41,6 @@ class GamesController < ApplicationController
   private def choose_last_two_cards
     #escolhe 2 cards e encerra o jogo para o jogador
     #ainda pensando em como fazer isso, com tempo mas sem foco hoje T_T
-  end
-
-  private def select_card(player)
-    player.player_cards
   end
 
   private def push_into_parade
@@ -91,6 +82,12 @@ class GamesController < ApplicationController
   end
 
   def next_player;end
+
+  private def set_game
+    @game = Game.with_associations(params[:id])
+    @players = @game.players
+    @board = @game.board
+  end
 
   private def game_params
     params.require(:game).permit(:card_id, :board_id, :player_id, players:[])
