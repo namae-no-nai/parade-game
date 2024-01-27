@@ -17,34 +17,26 @@ export default class extends Controller {
     this.sendPostRequest(gameId, playerCardId, playerId, boardId);
   }
 
-  async sendPostRequest(gameId, playerCardId, playerId, boardId) {
+  sendPostRequest(gameId, playerCardId, playerId, boardId) {
     const url = `/game/${gameId}/player_turn`;
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({
-          game: {
-            card_id: playerCardId,
-            player_id: playerId,
-            board_id: boardId
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      // Handle the success response, if needed
-      const responseData = await response.json();
-      console.log(responseData);
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+        "Accept": "text/html"
+      },
+      body: JSON.stringify({
+        game: {
+          card_id: playerCardId,
+          player_id: playerId,
+          board_id: boardId
+        }
+      }),
+    }).then(response => response.text())
+      .then(html => {
+        document.body.innerHTML = html;
+      })
   }
 }
