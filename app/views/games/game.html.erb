@@ -1,13 +1,13 @@
-<div class="players">
-  <% @players.each do |player| %>
-    <div class="player">
-      <h3>Player: <%= player.name %></h3>
+<div class="players flex justify-evenly flex-wrap mt-5" data-controller="game">
+  <% @game.players.each do |player| %>
+    <div class="player border rounded p-2" data-player-id="<%= player.id %>">
+      <h3 class="font-bold"><%= player.name %></h3>
 
-      <div class="playerCards" style=" display: flex; flex-direction: column; justify-content: center;">
-        <% player.cards.each do |card| %>
-          <div class="card" style="border: 1px solid black;">
-            <p>Suit: <%= card.suit %></p>
-            <p>Value: <%= card.value %></p>
+      <div class="playerCards grid grid-cols-2 mt-2">
+        <% player.player_cards.each do |player_card| %>
+          <div data-action="click->game#selectPlayerCard" data-player-card-id="<%= player_card.id %>" class="player-card p-1 card border hover:bg-purple-500 hover:cursor-pointer">
+            <p>Suit: <%= player_card.card.suit %></p>
+            <p>Value: <%= player_card.card.value %></p>
           </div>
         <% end %>
       </div>
