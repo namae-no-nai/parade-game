@@ -10,18 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_23_003525) do
+ActiveRecord::Schema[7.0].define(version: 2024_01_27_011021) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "boards", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "game_id", null: false
+    t.index ["game_id"], name: "index_boards_on_game_id"
   end
 
   create_table "cards", force: :cascade do |t|
     t.string "suit"
     t.string "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "game_logs", force: :cascade do |t|
+    t.bigint "game_id", null: false
+    t.bigint "player_id", null: false
+    t.string "action"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_game_logs_on_game_id"
+    t.index ["player_id"], name: "index_game_logs_on_player_id"
+  end
+
+  create_table "games", force: :cascade do |t|
+    t.datetime "started_at"
+    t.datetime "ended_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -41,7 +60,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_23_003525) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "game_id", null: false
+    t.index ["game_id"], name: "index_players_on_game_id"
   end
 
+  add_foreign_key "boards", "games"
+  add_foreign_key "game_logs", "games"
+  add_foreign_key "game_logs", "players"
   add_foreign_key "player_cards", "cards"
+  add_foreign_key "players", "games"
 end

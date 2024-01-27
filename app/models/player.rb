@@ -1,22 +1,10 @@
 class Player < ApplicationRecord
-	validates :name, presence: true
-	has_many :player_cards, as: :owner
-	has_many :cards, through: :player_cards
+  include Cardable
 
+  validates :name, presence: true
 
-	def self.create_players_for_game(players_names, deck, hand)
-    players = []
-    debugger
-    players_names.map do |player_name|
-      players <<  Player.find_or_create_by!(name: player_name)
-    end
+  belongs_to :game
 
-    players.each do |player|
-      deck.pop(hand).each do |card|
-        player.player_cards.create!(card: card, place: 'Hand')
-      end
-    end
-
-    players
-  end
+  has_many :player_cards, as: :owner
+  has_many :cards, through: :player_cards
 end

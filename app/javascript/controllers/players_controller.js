@@ -21,11 +21,13 @@ export default class extends Controller {
     inputPlayer.setAttribute('name', 'game[players][]')
     inputPlayer.setAttribute('data-players-target', 'playerName')
     inputPlayer.setAttribute('placeholder', 'Player Name')
+    inputPlayer.setAttribute('class', 'rounded mt-2')
 
     const buttonRemove = document.createElement('button')
     buttonRemove.setAttribute('type', 'button')
     buttonRemove.setAttribute('name', 'button')
     buttonRemove.setAttribute('data-action', 'click->players#removePlayer')
+    buttonRemove.setAttribute('class', 'rounded p-2 bg-red-400 ml-1')
     buttonRemove.innerHTML = 'Remove Player'
 
     divPlayer.appendChild(inputPlayer)
