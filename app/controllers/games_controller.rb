@@ -1,6 +1,6 @@
 class GamesController < ApplicationController
 
-  before_action :set_game, only: %w[ game player_turn]
+  before_action :set_game, only: %w[ game player_turn ]
 
   def index
     @game = Game.new
@@ -20,7 +20,7 @@ class GamesController < ApplicationController
     @player = @players.find(game_params[:player_id])
 
     push_into_parade
-    retrieve_cards_to_table
+    retrieve_cards_to_player
 
     deck = @game.player_cards
     last_round if deck.empty? || all_suits?
@@ -32,7 +32,7 @@ class GamesController < ApplicationController
 
   def last_round
     # push_into_parade(card)
-    # retrieve_cards_to_table(card)
+    # retrieve_cards_to_player(card)
     # choose_last_two_cards
 
     # next_player
@@ -50,12 +50,16 @@ class GamesController < ApplicationController
       )
   end
 
-  private def retrieve_cards_to_table
+  private def retrieve_cards_to_player
     card = PlayerCard.find(game_params[:card_id]).card
     return joker if card.value.zero?
     return if @board.player_cards.length <= card.value
 
-    compare_cards(card:, retrievable_cards: @board.retrievable_cards(card))
+    PlayerCard.compare_card_and_retreive(
+      card:,
+      retrievable_cards: @board.retrievable_cards(card),
+      owner: @player
+    )
   end
 
   private def joker
@@ -65,11 +69,7 @@ class GamesController < ApplicationController
   end
 
   private def compare_cards(card:, retrievable_cards:)
-    retrievable_cards.each do |retrievable_card|
-      if retrievable_card.suit == card.suit || retrievable_card.value <= card.value
-        retrievable_card.update!(owner: @player, place: 'Table')
-      end
-    end
+    bring_cards_to_player(card:, )
   end
 
   private def all_suits?
