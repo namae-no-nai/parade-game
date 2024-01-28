@@ -22,8 +22,7 @@ class GamesController < ApplicationController
     push_into_parade
     retrieve_cards_to_player
 
-    deck = @game.player_cards
-    last_round if deck.empty? || all_suits?
+    last_round if @game.player_cards.empty? || all_suits?
 
     draw_card
 
