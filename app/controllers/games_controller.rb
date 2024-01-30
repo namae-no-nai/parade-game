@@ -30,16 +30,24 @@ class GamesController < ApplicationController
   end
 
   def last_round
-    # push_into_parade(card)
-    # retrieve_cards_to_player(card)
-    # choose_last_two_cards
-
     # next_player
+    push_into_parade
+
+    retrieve_cards_to_player
+    choose_last_two_cards
+
+    #final_score if last_player?
+
+  end
+
+  def final_score
+    #check who/s have the most card of the same suit, and sum those cards as +1 each
+    #other cards should sum its values
+    ## elsif game with 2 players the player with most cards of same suit should have more than 2 cards of same suit more than the other player
   end
 
   private def choose_last_two_cards
-    #escolhe 2 cards e encerra o jogo para o jogador
-    #ainda pensando em como fazer isso, com tempo mas sem foco hoje T_T
+    @player.player_cards.on_hand
   end
 
   private def push_into_parade
@@ -64,7 +72,8 @@ class GamesController < ApplicationController
   private def joker
     # here the player could choose any card to be added to his table cards
     # he wants once a card with value 0 was added to the parade
-    @board[..-1]
+    debugger
+    @board.player_cards[1..]
   end
 
   private def compare_cards(card:, retrievable_cards:)
