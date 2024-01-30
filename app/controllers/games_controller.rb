@@ -95,7 +95,6 @@ class GamesController < ApplicationController
   end
 
   private def last_round_conditions?
-    debugger
     @game.player_cards.empty? || all_suits?
   end
 
