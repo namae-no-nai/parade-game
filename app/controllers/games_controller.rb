@@ -22,9 +22,7 @@ class GamesController < ApplicationController
     push_into_parade
     retrieve_cards_to_player
 
-    last_round if @game.player_cards.empty? || all_suits?
-
-    draw_card
+    last_round_conditions? ? last_round : draw_card
 
     render :game
   end
@@ -44,6 +42,15 @@ class GamesController < ApplicationController
     #check who/s have the most card of the same suit, and sum those cards as +1 each
     #other cards should sum its values
     ## elsif game with 2 players the player with most cards of same suit should have more than 2 cards of same suit more than the other player
+    game = Game.find(game_id)
+
+    suits = %w[Dodo MadHatter HumptyDumpty Alice CheshireCat WhiteRabbit ]
+
+    suits.each do |suit|
+      player_with_most_cards = game.players do |player|
+        player.cards.where(suit:).count
+      end
+    end
   end
 
   private def choose_last_two_cards
@@ -72,7 +79,6 @@ class GamesController < ApplicationController
   private def joker
     # here the player could choose any card to be added to his table cards
     # he wants once a card with value 0 was added to the parade
-    debugger
     @board.player_cards[1..]
   end
 
@@ -88,7 +94,14 @@ class GamesController < ApplicationController
     @game.draw_card(@player)
   end
 
-  def next_player;end
+  private def last_round_conditions?
+    debugger
+    @game.player_cards.empty? || all_suits?
+  end
+
+  private def next_player
+    # we need to implement the order of the playerss
+  end
 
   private def set_game
     @game = Game.with_associations(params[:id])
