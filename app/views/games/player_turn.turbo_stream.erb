@@ -1,0 +1,7 @@
+<%= turbo_stream.update @player do %>
+    <%= render 'player', player: @player %>
+<% end %>
+
+<%= turbo_stream.update @board do %>
+    <%= render 'board', board: @board %>
+<% end %>

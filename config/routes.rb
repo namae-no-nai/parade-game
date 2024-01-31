@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   resources :games, only: %i[show] do
     collection do
-      post :initialize_game
+      post :setup
     end
 
     member do
