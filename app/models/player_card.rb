@@ -13,7 +13,7 @@ class PlayerCard < ApplicationRecord
 
   def compare_card_and_retreive(retrievable_cards:, owner:)
     retrievable_cards.each do |retrievable_card|
-      if retrievable_card.suit == card.suit || retrievable_card.value <= card.value
+      if retrievable_card.suit == card.suit || retrievable_card.value.to_i <= card.value.to_i
         retrievable_card.update!(owner:, place: 'Table')
       end
     end
