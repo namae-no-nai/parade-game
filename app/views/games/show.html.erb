@@ -1,0 +1,9 @@
+<div class="players flex justify-evenly flex-wrap mt-5">
+  <% @players.each do |player| %>
+    <%= render 'player', player: %>
+
+    <hr>
+  <% end %>
+</div>
+
+<%= render 'board', board: @board %>

@@ -1,7 +1,13 @@
 Rails.application.routes.draw do
   root to: 'games#index'
 
-  post '/initialize_game', to: 'games#initialize_game'
-  get '/game/:id', to: 'games#game', as: 'game'
-  post '/game/:id/player_turn', to: 'games#player_turn'
+  resources :games, only: %i[show] do
+    collection do
+      post :setup
+    end
+
+    member do
+      post :player_turn, as: :player_turn
+    end
+  end
 end

@@ -1,0 +1,3 @@
+<%= turbo_stream.replace @player, partial: 'games/player', locals: {player: @player} %>
+
+<%= turbo_stream.replace @board, partial: 'games/board', locals: {board: @board.reload} %>

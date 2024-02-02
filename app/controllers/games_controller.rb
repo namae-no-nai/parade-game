@@ -1,12 +1,13 @@
-class GamesController < ApplicationController
+# frozen_string_literal: true
 
-  before_action :set_game, only: %w[ game player_turn ]
+class GamesController < ApplicationController
+  before_action :set_game, only: %w[show player_turn]
 
   def index
     @game = Game.new
   end
 
-  def initialize_game
+  def setup
     @game = Game.create!(started_at: Time.current)
     @game.initialize_game(game_params[:players])
     return render :index, status: 400 if @game.errors.any?
@@ -14,17 +15,21 @@ class GamesController < ApplicationController
     redirect_to game_path(@game)
   end
 
-  def game; end
+  def show; end
 
   def player_turn
     @player = @players.find(game_params[:player_id])
+    @player_card = PlayerCard.find_by(id: game_params[:player_card_id])
 
     push_into_parade
     retrieve_cards_to_player
 
     last_round_conditions? ? last_round : draw_card
 
-    render :game
+    respond_to do |format|
+      format.html { redirect_to game_path(@game) }
+      format.turbo_stream
+    end
   end
 
   def last_round
@@ -58,19 +63,15 @@ class GamesController < ApplicationController
   end
 
   private def push_into_parade
-    PlayerCard.card_ownership(
-        card_id:game_params[:card_id],
-        owner_id:game_params[:board_id]
-      )
+    @player_card.send_to_board(@board)
   end
 
   private def retrieve_cards_to_player
-    card = PlayerCard.find(game_params[:card_id]).card
-    return joker if card.value.zero?
-    return if @board.player_cards.length <= card.value
+    card = @player_card.card
+    return joker if card.value.to_i.zero?
+    return if @board.player_cards.length <= card.value.to_i
 
-    PlayerCard.compare_card_and_retreive(
-      card:,
+    @player_card.compare_card_and_retreive(
       retrievable_cards: @board.retrievable_cards(card),
       owner: @player
     )
@@ -104,11 +105,11 @@ class GamesController < ApplicationController
 
   private def set_game
     @game = Game.with_associations(params[:id])
-    @players = @game.players
+    @players = @game.players.includes(:player_cards)
     @board = @game.board
   end
 
   private def game_params
-    params.require(:game).permit(:card_id, :board_id, :player_id, players:[])
+    params.require(:game).permit(:card_id, :board_id, :player_id, :player_card_id, players:[])
   end
 end
