@@ -2,6 +2,7 @@ class Player < ApplicationRecord
   include Cardable
 
   validates :name, presence: true
+  validates :turn_order, presence: true, uniqueness: { scope: :game_id }
 
   belongs_to :game
 

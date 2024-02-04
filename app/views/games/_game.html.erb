@@ -1,0 +1,17 @@
+<%= turbo_frame_tag game do %>
+  <% if flash[:notice].present? %>
+    <div class="flex justify-center mt-5">
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
+
+  <div class="players flex justify-evenly flex-wrap mt-5">
+    <% game.players.each do |player| %>
+      <%= render 'games/player', player: %>
+
+      <hr>
+    <% end %>
+  </div>
+
+  <%= render 'games/board', board: game.board %>
+<% end %>

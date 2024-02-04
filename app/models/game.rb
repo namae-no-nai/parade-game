@@ -1,7 +1,7 @@
 class Game < ApplicationRecord
   include Cardable
 
-  validates :started_at, presence: true
+  validates :started_at, :turn, presence: true
 
   has_one :board
   has_many :players
@@ -10,9 +10,9 @@ class Game < ApplicationRecord
   has_many :cards, through: :player_cards
 
   scope :with_associations, ->(id) {
-  includes(:board, :player_cards, players: { player_cards: :card })
-  .find(id)
-}
+    includes(:board, :player_cards, players: { player_cards: :card })
+    .find(id)
+  }
 
   INITIAL_HAND = 5
   INITIAL_PARADE = 6
@@ -29,34 +29,50 @@ class Game < ApplicationRecord
   end
 
   def draw_card(player)
-    drawed_card = self.player_cards.first
+    drawed_card = player_cards.first
     drawed_card.update(owner: player, place: 'Hand')
   end
 
+  def next_turn!
+    self.turn += 1
+    self.turn = 1 if turn > players.size
+
+    save!
+  end
+
   def calculate_scores
-    player_grouped_cards = self.players.map do |player|
-      {
-        player: player,
-        grouped_cards: player.player_cards.on_table.joins(:card).group(:suit).count
-      }
-    end
-    
-    suits = %w[Dodo MadHatter HumptyDumpty Alice CheshireCat WhiteRabbit]
-    player_most_owned_cards = suits.map do |suit|
-      player = player_grouped_cards.max_by { |pgc| pgc[:grouped_cards][suit].to_i }
-    
-      { suit: suit, player: player[:player], count: player[:grouped_cards][suit].to_i }
-    end
-    
-    player_scores = self.players.map do |player|
-      most_owned_suits = player_most_owned_cards.select { |pmoc| pmoc[:player] == player }.map { |pmoc| pmoc[:suit] }
-      score = player.player_cards.on_table.includes(:card).sum { |pc| most_owned_suits.include?(pc.card.suit) ? 1 : pc.card.value }
-    
-      { player: player, score: score }
+    players.map do |player|
+      most_owned_suits = players_most_owned_cards.select { |pmoc| pmoc[:player] == player }.map { |pmoc| pmoc[:suit] }
+      score = player.player_cards.on_table.includes(:card).sum do |pc|
+        most_owned_suits.include?(pc.card.suit) ? 1 : pc.card.value
+      end
+
+      { player:, score: }
     end
   end
 
+  def broadcast_game_change
+    broadcast_replace_to self, target: self, partial: 'games/game', locals: { game: self }
+  end
+
   private
+
+  def players_grouped_cards
+    players.map do |player|
+      {
+        player:,
+        grouped_cards: player.player_cards.on_table.joins(:card).group(:suit).count
+      }
+    end
+  end
+
+  def players_most_owned_cards
+    Card::SUITS.map do |suit|
+      player = players_grouped_cards.max_by { |pgc| pgc[:grouped_cards][suit].to_i }
+
+      { suit:, player: player[:player], count: player[:grouped_cards][suit].to_i }
+    end
+  end
 
   def initialize_deck
     return if player_cards.any?
