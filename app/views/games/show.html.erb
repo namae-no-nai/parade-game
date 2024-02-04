@@ -1,3 +1,5 @@
+<%= turbo_stream_from @game %>
+
 <div class="players flex justify-evenly flex-wrap mt-5">
   <% @players.each do |player| %>
     <%= render 'player', player: %>
