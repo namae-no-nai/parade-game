@@ -8,7 +8,7 @@ class PlayerCard < ApplicationRecord
   scope :on_table, -> { where(place: 'Table') }
   scope :on_hand, -> { where(place: 'Hand') }
 
-  after_update_commit :broadcast_change
+  # after_update_commit :broadcast_change
 
   def send_to_board(board)
     update!(owner: board, place: 'Board')

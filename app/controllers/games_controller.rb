@@ -2,6 +2,7 @@
 
 class GamesController < ApplicationController
   before_action :set_game, only: %w[show player_turn]
+  before_action :verify_player_turn, only: %w[player_turn]
 
   def index
     @game = Game.new
@@ -18,13 +19,14 @@ class GamesController < ApplicationController
   def show; end
 
   def player_turn
-    @player = @players.find(game_params[:player_id])
     @player_card = PlayerCard.find_by(id: game_params[:player_card_id])
 
     push_into_parade
     retrieve_cards_to_player
 
     last_round_conditions? ? last_round : draw_card
+    @game.next_turn!
+    @game.broadcast_game_change
 
     respond_to do |format|
       format.html { redirect_to game_path(@game) }
@@ -83,10 +85,6 @@ class GamesController < ApplicationController
     @board.player_cards[1..]
   end
 
-  private def compare_cards(card:, retrievable_cards:)
-    bring_cards_to_player(card:, )
-  end
-
   private def all_suits?
     @player.all_suits?
   end
@@ -109,7 +107,16 @@ class GamesController < ApplicationController
     @board = @game.board
   end
 
+  private def verify_player_turn
+    redirect_to game_path(@game), notice: "It's not your turn yet, please wait" unless correct_player?
+  end
+
+  def correct_player?
+    @player = @players.find(game_params[:player_id])
+    @game.turn == @player.turn_order
+  end
+
   private def game_params
-    params.require(:game).permit(:card_id, :board_id, :player_id, :player_card_id, players:[])
+    params.require(:game).permit(:card_id, :board_id, :player_id, :player_card_id, players: [])
   end
 end
