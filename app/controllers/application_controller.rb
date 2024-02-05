@@ -18,7 +18,9 @@ class ApplicationController < ActionController::Base
     if game_session
       @current_player = @game.players.find(game_session['player_id'])
     else
-      redirect_to join_game_path(@game) unless game_session
+      return redirect_to root_path, alert: 'Game already started you cannot join :(' if @game.started?
+
+      redirect_to join_game_path(@game)
     end
   end
 end

@@ -1,1 +1,1 @@
-<%= turbo_stream.replace @game %>
+<%= turbo_stream.replace @game, target: @game, partial: 'games/game', locals: { game: @game, current_player: @current_player } %>

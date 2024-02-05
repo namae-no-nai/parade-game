@@ -3,7 +3,7 @@
 class GamesController < ApplicationController
   before_action :set_game, only: %i[show start player_turn]
   before_action :verify_player_turn, only: %i[player_turn]
-  before_action :set_current_player, only: %i[show start]
+  before_action :set_current_player, only: %i[show start player_turn]
 
   def index
     @game = Game.new
@@ -43,22 +43,17 @@ class GamesController < ApplicationController
   def start
     @game = Game.find(params[:id])
     if @game.start_game
-      redirect_to game_path(@game)
+
+      respond_to do |format|
+        format.html { redirect_to game_path(@game) }
+        format.turbo_stream
+      end
     else
-      render :waiting_players_list, status: :unprocessable_entity
+      render :show, status: :unprocessable_entity
     end
   end
 
-  def show
-    case @game.status
-    when 'waiting'
-      render :waiting_players_list
-    when 'started'
-      render :game
-    when 'finished'
-      render :finished
-    end
-  end
+  def show; end
 
   def player_turn
     @player_card = PlayerCard.find_by(id: game_params[:player_card_id])
@@ -68,7 +63,6 @@ class GamesController < ApplicationController
 
     last_round_conditions? ? last_round : draw_card
     @game.next_turn!
-    @game.broadcast_game_change
 
     respond_to do |format|
       format.html { redirect_to game_path(@game) }

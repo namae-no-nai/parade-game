@@ -6,8 +6,8 @@
   <% end %>
 
   <div class="players flex justify-evenly flex-wrap mt-5">
-    <% game.players.each do |player| %>
-      <%= render 'games/player', player: %>
+    <% game.players.order(turn_order: :asc).each do |player| %>
+      <%= render partial: 'games/player', locals: { player:, current_player: } %>
 
       <hr>
     <% end %>

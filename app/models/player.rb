@@ -22,10 +22,19 @@ class Player < ApplicationRecord
     player_cards.on_table.group_by(&:suit).count == 6
   end
 
+  def broadcast_game_change
+    broadcast_replace_to(
+      self,
+      target: game,
+      partial: 'games/game',
+      locals: { game:, current_player: self }
+    )
+  end
+
   private
 
   def unique_leader
-    errors.add(:leader, 'already exists') if leader? && game.players.leader.exists?
+    errors.add(:leader, 'already exists') if leader? && game.players.leader.where.not(id:).exists?
   end
 
   def broadcast_new_player
