@@ -1,8 +1,5 @@
 <%= turbo_frame_tag 'waiting_list' do %>
   <% game.players.each do |player| %>
-    <div class="player flex justify-between gap-5">
-      <p><%= player.name %></p>
-      <p><%= player.status %></p>
-    </div>
+    <%= render partial: 'games/waiting_player', locals: { player: } %>
   <% end %>
 <% end %>
