@@ -30,6 +30,15 @@ class Game < ApplicationRecord
     create_initial_board
   end
 
+  def start_game
+    if players.all?(&:ready?) && players.size.between?(2, 6)
+      update status: :started
+    else
+      errors.add(:players, 'must be between 2 and 6 and all players must be ready')
+      false
+    end
+  end
+
   def draw_card(player)
     drawed_card = player_cards.first
     drawed_card.update(owner: player, place: 'Hand')

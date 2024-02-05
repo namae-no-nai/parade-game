@@ -1,5 +1,5 @@
 <div class="flex justify-center mt-12">
-  <%= form_with model: @player, url: games_path, method: :post do |f| %>
+  <%= form_with model: @player, url: game_players_path(@player.game_id), method: :post do |f| %>
     <%= render partial: 'games/errors', locals: {object: @game} %>
     <%= render partial: 'games/errors', locals: {object: @player} %>
 
@@ -9,7 +9,7 @@
     </div>
 
     <div class="flex justify-center mt-2">
-      <%= f.submit "Create new game", class: "rounded p-2 bg-lime-500" %>
+      <%= f.submit "Join game", class: "rounded p-2 bg-lime-500" %>
     </div>
   <% end %>
 </div>

@@ -7,7 +7,5 @@ class AddTurnOrderToPlayers < ActiveRecord::Migration[7.0]
         player.update!(turn_order: index + 1)
       end
     end
-
-    change_column_null :players, :turn_order, false
   end
 end
