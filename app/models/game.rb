@@ -9,23 +9,47 @@ class Game < ApplicationRecord
   has_many :player_cards, as: :owner
   has_many :cards, through: :player_cards
 
+  enum :status, %i[waiting started finished]
+
+  scope :ordered, -> { order(created_at: :desc) }
   scope :with_associations, ->(id) {
     includes(:board, :player_cards, players: { player_cards: :card })
-    .find(id)
+      .find(id)
   }
+  scope :joinable, -> { left_outer_joins(:players).waiting.group(:id).having('count(players.id) < 6') }
+
+  after_update_commit :broadcast_game_change
 
   INITIAL_HAND = 5
   INITIAL_PARADE = 6
 
-  def initialize_game(new_players)
-    if new_players.size < 2 || new_players.size > 6
-      errors.add(:players, 'must be between 2 and 6')
-      return
+  def name
+    "Game #{id}"
+  end
+
+  def initialize_game
+    initialize_deck
+    create_initial_board
+
+    hand_cards = players.shuffle.map.with_index do |player, index|
+      player.update!(turn_order: index + 1)
+      hand_cards = cards.sample(INITIAL_HAND)
+      player.add_cards(hand_cards, 'Hand')
+
+      hand_cards
     end
 
-    initialize_deck
-    create_players(new_players)
-    create_initial_board
+    remove_cards hand_cards
+  end
+
+  def start_game
+    if players.all?(&:ready?) && players.size.between?(2, 6)
+      initialize_game
+      update status: :started
+    else
+      errors.add(:players, 'must be between 2 and 6 and all players must be ready')
+      false
+    end
   end
 
   def draw_card(player)
@@ -51,11 +75,11 @@ class Game < ApplicationRecord
     end
   end
 
-  def broadcast_game_change
-    broadcast_replace_to self, target: self, partial: 'games/game', locals: { game: self }
-  end
-
   private
+
+  def broadcast_game_change
+    players.each(&:broadcast_game_change)
+  end
 
   def players_grouped_cards
     players.map do |player|
@@ -78,21 +102,6 @@ class Game < ApplicationRecord
     return if player_cards.any?
 
     add_cards(Card.shuffled_deck, 'Deck')
-  end
-
-  def create_players(new_players, deck = cards)
-    return if players.any?
-
-    hand_cards = new_players.map do |player_name|
-      player = players.create!(name: player_name)
-
-      hand_cards = deck.sample(INITIAL_HAND)
-      player.add_cards(hand_cards, 'Hand')
-
-      hand_cards
-    end.flatten
-
-    remove_cards hand_cards
   end
 
   def create_initial_board(deck = cards)

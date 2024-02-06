@@ -1,23 +1,41 @@
 <div class="flex justify-center mt-12">
-  <form action=<%= setup_games_path %> method="post">
-    <div id="playersList" data-controller="players">
-      <button class="bg-blue-400 text-slate-100 rounded p-2 mb-2" type="button" data-action="click->players#addPlayer">Add Player</button>
-      <div class="player">
-        <input type="text" name="game[players][]" data-players-target="playerName" placeholder="Player Name" class="rounded">
-        <button type="button" data-action="click->players#removePlayer" class="rounded p-2 bg-red-400">Remove Player</button>
-      </div>
-    </div>
-
-    <button type="submit" class="rounded p-2 bg-lime-500 mt-2">Start game</button>
-
-    <% if @game.errors.any? %>
-      <div class="bg-red-400 text-slate-100 rounded p-2 mt-2">
-        <ul>
-          <% @game.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-          <% end %>
+  <div class="flex flex-col">
+    <% if flash[:alert].present? %>
+      <div class="flex flex-col bg-red-100 p-2 rounded">
+        <ul class="text-red-500">
+          <li><%= flash[:alert] %></li>
         </ul>
       </div>
     <% end %>
-  </form>
+
+    <h1 class="text-4xl">Welcome to Parade Game!</h1>
+    <p class="mt-4">Please enter your name to create a new game.</p>
+  </div>
 </div>
+
+<div class="flex justify-center mt-12">
+  <%= form_with model: @player, url: games_path, method: :post do |f| %>
+    <%= render partial: 'games/errors', locals: {object: @game} %>
+    <%= render partial: 'games/errors', locals: {object: @player} %>
+
+    <div class="flex flex-col">
+      <label for="game_player_name">Your name</label>
+      <%= f.text_field :name, class: "rounded p-2", required: true %>
+    </div>
+
+    <div class="flex justify-center mt-2">
+      <%= f.submit "Create new game", class: "rounded p-2 bg-lime-500" %>
+    </div>
+  <% end %>
+</div>
+
+<div class="flex justify-center mt-12">
+  <div class="flex flex-col gap-2">
+    <h2 class="text-2xl">Or join an existing game</h2>
+    <% @joinable_games.ordered.each do |joinable_game| %>
+      <div class="flex justify-center gap-5">
+        <p><%= joinable_game.name %></p>
+        <%= link_to 'Join', game_path(joinable_game), class: 'px-2 py-1 bg-blue-500 rounded text-slate-100' %>
+      </div>
+    <% end %>
+  </div>

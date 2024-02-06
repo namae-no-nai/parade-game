@@ -1,6 +1,6 @@
-<div class="board flex justify-center items-center flex-wrap flex-row-reverse mt-5">
-  <div class="boardCards flex flex-row-reverse mt-5">
-    <% board.player_cards.each do |player_card| %>
+<div class="board flex justify-center items-center mt-5">
+  <div class="boardCards flex mt-5 flex-wrap">
+    <% board.player_cards.ordered.each do |player_card| %>
       <div class="board-card p-1 card border hover:bg-purple-500 hover:cursor-pointer">
         <p>Suit: <%= player_card.card.suit %></p>
         <p>Value: <%= player_card.card.value %></p>

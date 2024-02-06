@@ -1,0 +1,15 @@
+<div class="flex justify-center mt-12">
+  <%= form_with model: @player, url: game_players_path(@player.game_id), method: :post do |f| %>
+    <%= render partial: 'games/errors', locals: {object: @game} %>
+    <%= render partial: 'games/errors', locals: {object: @player} %>
+
+    <div class="flex flex-col">
+      <label for="game_player_name">Your name</label>
+      <%= f.text_field :name, class: "rounded p-2", required: true %>
+    </div>
+
+    <div class="flex justify-center mt-2">
+      <%= f.submit "Join game", class: "rounded p-2 bg-lime-500" %>
+    </div>
+  <% end %>
+</div>
