@@ -35,6 +35,8 @@ class GamesController < ApplicationController
   end
 
   def last_round
+    # Here it could add a flag for the game and all players start here
+
     # next_player
     push_into_parade
 
@@ -61,7 +63,10 @@ class GamesController < ApplicationController
   end
 
   private def choose_last_two_cards
-    @player.player_cards.on_hand
+    # here we need to choose 2 cards and push into table
+    # cards.each do |do|
+    #   card.send_to_table(@player)
+    # end
   end
 
   private def push_into_parade
@@ -80,9 +85,12 @@ class GamesController < ApplicationController
   end
 
   private def joker
-    # here the player could choose any card to be added to his table cards
-    # he wants once a card with value 0 was added to the parade
-    @board.player_cards[1..]
+    # here the player could choose any card to be added to his table cards or none
+    # I believe it would need a button to confirm after selecting any cards or none
+
+    # cards.each do |card|
+    #   card.send_to_table(@player)
+    # end
   end
 
   private def all_suits?

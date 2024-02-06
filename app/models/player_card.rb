@@ -14,6 +14,10 @@ class PlayerCard < ApplicationRecord
     update!(owner: board, place: 'Board')
   end
 
+  def send_to_table(player)
+    update!(owner: player, place: 'Table')
+  end
+
   def compare_card_and_retreive(retrievable_cards:, owner:)
     retrievable_cards.each do |retrievable_card|
       if retrievable_card.suit == card.suit || retrievable_card.value.to_i <= card.value.to_i
