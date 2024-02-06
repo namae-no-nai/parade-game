@@ -58,8 +58,8 @@ class GamesController < ApplicationController
   def player_turn
     @player_card = PlayerCard.find_by(id: game_params[:player_card_id])
 
-    push_into_parade
     retrieve_cards_to_player
+    push_into_parade
 
     last_round_conditions? ? last_round : draw_card
     @game.next_turn!
@@ -110,7 +110,7 @@ class GamesController < ApplicationController
     return if @board.player_cards.length <= card.value.to_i
 
     @player_card.compare_card_and_retreive(
-      retrievable_cards: @board.retrievable_cards(card),
+      retrievable_board_cards: @board.retrievable_cards(card),
       owner: @player
     )
   end
