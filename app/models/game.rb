@@ -11,15 +11,21 @@ class Game < ApplicationRecord
 
   enum :status, %i[waiting started finished]
 
+  scope :ordered, -> { order(created_at: :desc) }
   scope :with_associations, ->(id) {
     includes(:board, :player_cards, players: { player_cards: :card })
       .find(id)
   }
+  scope :joinable, -> { left_outer_joins(:players).waiting.group(:id).having('count(players.id) < 6') }
 
   after_update_commit :broadcast_game_change
 
   INITIAL_HAND = 5
   INITIAL_PARADE = 6
+
+  def name
+    "Game #{id}"
+  end
 
   def initialize_game
     initialize_deck

@@ -7,6 +7,7 @@ class GamesController < ApplicationController
 
   def index
     @game = Game.new
+    @joinable_games = Game.joinable
     @player = @game.players.new
   end
 

@@ -28,3 +28,14 @@
     </div>
   <% end %>
 </div>
+
+<div class="flex justify-center mt-12">
+  <div class="flex flex-col gap-2">
+    <h2 class="text-2xl">Or join an existing game</h2>
+    <% @joinable_games.ordered.each do |joinable_game| %>
+      <div class="flex justify-center gap-5">
+        <p><%= joinable_game.name %></p>
+        <%= link_to 'Join', game_path(joinable_game), class: 'px-2 py-1 bg-blue-500 rounded text-slate-100' %>
+      </div>
+    <% end %>
+  </div>
