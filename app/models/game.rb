@@ -60,7 +60,6 @@ class Game < ApplicationRecord
   def next_turn!
     self.turn += 1
     self.turn = 1 if turn > players.size
-
     save!
   end
 
