@@ -13,7 +13,7 @@
     <% end %>
   </div>
 
-  <% if game.joker_play %>
+  <% if game.joker_play? && game.current_player_turn?(current_player) %>
     <%= form_with model: game, url: player_turn_game_path(game), method: :post do |f| %>
       <%= f.hidden_field :player_id, value: current_player.id %>
 
