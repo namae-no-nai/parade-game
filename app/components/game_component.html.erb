@@ -1,0 +1,10 @@
+<turbo-frame id=<%= dom_id(@game) %>>
+  <% case @game.status %>
+  <% when "waiting" %>
+    <%= render(Game::WaitingListComponent.new(game: @game, current_player: @current_player)) %>
+  <% else %>
+    <%= render(Game::PlayersComponent.new(players: @game.players.ordered, current_player: @current_player)) %>
+    <br>
+    <%= render(Game::BoardComponent.new(game: @game, current_player: @current_player)) %>
+  <% end %>
+</turbo-frame>

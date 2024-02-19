@@ -1,0 +1,20 @@
+<% if @selectable %>
+  <%= form_with model: @player.game, method: :post, url: player_turn_game_path(@player.game) do |f| %>
+    <%= f.hidden_field :player_id, value: @player.id %>
+    <%= f.hidden_field :player_card_id, value: @player_card.id %>
+
+    <button type="submit">
+      <div class="border p-1 hover:cursor-point hover:bg-violet-400">
+        <p>Suit: <%= @player_card.suit %></p>
+        <p>Value: <%= @player_card.value %></p>
+      </div>
+    </button>
+  <% end %>
+<% else %>
+  <div class="border p-1">
+    <p>Suit: <%= @player_card.suit %></p>
+    <p>Value: <%= @player_card.value %></p>
+  </div>
+<% end %>
+
+

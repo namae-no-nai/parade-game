@@ -9,7 +9,7 @@ class Game < ApplicationRecord
   has_many :player_cards, as: :owner
   has_many :cards, through: :player_cards
 
-  enum :status, %i[waiting started finished]
+  enum :status, %i[waiting started last_rounds last_round finished]
 
   scope :ordered, -> { order(created_at: :desc) }
   scope :with_associations, ->(id) {
@@ -81,7 +81,9 @@ class Game < ApplicationRecord
   private
 
   def broadcast_game_change
-    players.each(&:broadcast_game_change)
+    players.each do |player|
+      ::BroadcastGame.send(game: self, current_player: player)
+    end
   end
 
   def players_grouped_cards

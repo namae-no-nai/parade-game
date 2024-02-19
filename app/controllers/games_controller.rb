@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class GamesController < ApplicationController
-  before_action :set_game, only: %i[show start player_turn]
+  before_action :set_game, only: %i[show start player_turn choose_last_cards]
   before_action :verify_player_turn, only: %i[player_turn]
-  before_action :set_current_player, only: %i[show start player_turn]
+  before_action :set_current_player, only: %i[show start player_turn choose_last_cards]
 
   def index
     @game = Game.new
@@ -64,40 +64,38 @@ class GamesController < ApplicationController
     push_into_parade
     retrieve_cards_to_player
 
-    last_round_conditions? ? last_round : draw_card
-    @game.next_turn! unless @game.joker_play
+    if @game.last_rounds?
+      if @game.game_logs.last.player == @player
+        @game.next_turn! unless @game.joker_play
+      else
+        @game.draw_card(@player)
+      end
+    else
+      @game.draw_card(@player)
+      @game.next_turn! unless @game.joker_play
+      @game.last_rounds! if @game.player_cards.empty? || all_suits?
+    end
 
+    @game.last_round! if @game.players.all? { |player| player.player_cards.on_hand.size == 4 }
+
+    @game.game_logs.create!(player: @player, action: 'played')
     respond_to do |format|
       format.html { redirect_to game_path(@game) }
-      format.turbo_stream
+      format.turbo_stream { render turbo_stream.replace @game, GameComponent.new(game: @game) }
     end
   end
 
-  def last_round
-    # Here it could add a flag for the game and all players start here
+  def choose_last_cards
+    @player = Player.find(game_params[:player_id])
+    player_selected_card_ids = params[:player_card_ids]
+    @player.player_cards.where(id: player_selected_card_ids).each { |it| it.update!(place: 'Table') }
+    @player.finished!
 
-    # next_player
-    push_into_parade
+    # redirect_to end_game_path(@game) if @game.players.all?(&:finished?)
 
-    retrieve_cards_to_player
-    choose_last_two_cards
-
-    #final_score if last_player?
-
-  end
-
-  def final_score
-    #check who/s have the most card of the same suit, and sum those cards as +1 each
-    #other cards should sum its values
-    ## elsif game with 2 players the player with most cards of same suit should have more than 2 cards of same suit more than the other player
-    game = Game.find(game_id)
-
-    suits = %w[Dodo MadHatter HumptyDumpty Alice CheshireCat WhiteRabbit ]
-
-    suits.each do |suit|
-      player_with_most_cards = game.players do |player|
-        player.cards.where(suit:).count
-      end
+    respond_to do |format|
+      format.html { redirect_to game_path(@game) }
+      format.turbo_stream { render :player_turn }
     end
   end
 
@@ -106,18 +104,12 @@ class GamesController < ApplicationController
     PlayerCard.where(id: player_selected_card_ids).each { |it| it.update!(owner: @player, place: 'Table') }
     @game.joker_play = false
     @game.next_turn!
+    @game.last_rounds! if @game.player_cards.empty? || all_suits?
 
     respond_to do |format|
       format.html { redirect_to game_path(@game) }
       format.turbo_stream
     end
-  end
-
-  private def choose_last_two_cards
-    # here we need to choose 2 cards and push into table
-    # cards.each do |do|
-    #   card.send_to_table(@player)
-    # end
   end
 
   private def push_into_parade
@@ -135,20 +127,12 @@ class GamesController < ApplicationController
     )
   end
 
-  private def all_suits?
-    @player.all_suits?
-  end
-
   private def draw_card
     @game.draw_card(@player)
   end
 
-  private def last_round_conditions?
-    @game.player_cards.empty? || all_suits?
-  end
-
-  private def next_player
-    # we need to implement the order of the playerss
+  private def all_suits?
+    @player.all_suits?
   end
 
   private def set_game
@@ -161,7 +145,7 @@ class GamesController < ApplicationController
     redirect_to game_path(@game), notice: "It's not your turn yet, please wait" unless correct_player?
   end
 
-  def correct_player?
+  private def correct_player?
     @player = @players.find(game_params[:player_id])
     @game.turn == @player.turn_order
   end

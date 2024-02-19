@@ -1,1 +1,3 @@
-<%= turbo_stream.replace @game, target: @game, partial: 'games/game', locals: { game: @game, current_player: @current_player } %>
+<%= turbo_stream.replace @game, target: @game do %>
+  <%= render(GameComponent.new(game: @game, current_player: @current_player)) %>
+<% end %>

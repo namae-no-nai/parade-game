@@ -1,0 +1,15 @@
+<turbo-frame id="waiting_list">
+  <h2>Waiting for the players</h2>
+  <div class="flex justify-center">
+    <div class="flex flex-col w-32">
+      <% @game.players.each do |player| %>
+        <div class="flex justify-between mt-2">
+          <p><%= player.name %></p>
+          <p><%= player.status %></p>
+        </div>
+
+        <hr>
+      <% end %>
+    </div>
+  </div>
+</turbo-frame>

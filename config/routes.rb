@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       post :new_player, as: :new_player
       patch :start, as: :start
       post :player_turn, as: :player_turn
+      post :choose_last_cards, as: :choose_last_cards
     end
 
     resources :players, only: %i[create] do

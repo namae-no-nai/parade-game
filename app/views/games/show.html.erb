@@ -1,9 +1,12 @@
 <%= turbo_stream_from @game %>
 <%= turbo_stream_from @current_player %>
 
-<% case @game.status %>
-<% when "waiting" %>
-  <%= render 'waiting_list', game: @game %>
-<% when "started" %>
-  <%= render partial: 'games/game', locals: { game: @game, current_player: @current_player } %>
+<% if flash[:notice].present? %>
+  <div class="flex justify-center mt-5">
+    <%= flash[:notice] %>
+  </div>
 <% end %>
+
+<div class="mt-5">
+  <%= render(GameComponent.new(game: @game, current_player: @current_player))%>
+</div>
