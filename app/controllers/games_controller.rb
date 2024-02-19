@@ -47,7 +47,7 @@ class GamesController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to game_path(@game) }
-        format.turbo_stream
+        format.turbo_stream { render turbo_stream.replace @game, GameComponent.new(game: @game)}
       end
     else
       render :show, status: :unprocessable_entity
