@@ -47,7 +47,7 @@ class GamesController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to game_path(@game) }
-        format.turbo_stream { render turbo_stream.replace @game, GameComponent.new(game: @game)}
+        format.turbo_stream { render turbo_stream.replace @game, html: GameComponent.new(game: @game, current_player:) }
       end
     else
       render :show, status: :unprocessable_entity
@@ -81,7 +81,7 @@ class GamesController < ApplicationController
     @game.game_logs.create!(player: @player, action: 'played')
     respond_to do |format|
       format.html { redirect_to game_path(@game) }
-      format.turbo_stream { render turbo_stream.replace @game, GameComponent.new(game: @game) }
+      format.turbo_stream { render turbo_stream.replace @game, html: GameComponent.new(game: @game, current_player:) }
     end
   end
 
@@ -95,7 +95,7 @@ class GamesController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to game_path(@game) }
-      format.turbo_stream { render :player_turn }
+      format.turbo_stream { render turbo_stream.replace @game, html: GameComponent.new(game: @game, current_player:) }
     end
   end
 
@@ -108,7 +108,7 @@ class GamesController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to game_path(@game) }
-      format.turbo_stream
+      format.turbo_stream { render turbo_stream.replace @game, html: GameComponent.new(game: @game, current_player:) }
     end
   end
 

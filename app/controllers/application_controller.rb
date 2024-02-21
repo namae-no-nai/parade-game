@@ -3,6 +3,8 @@
 class ApplicationController < ActionController::Base
   private
 
+  attr_reader :current_player
+
   def create_game_session
     return if game_session
 

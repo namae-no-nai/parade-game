@@ -1,6 +1,8 @@
 <turbo-frame id=<%= dom_id(@game.board)%>>
   <% if joker_play? %>
-    <%= form_with url: player_turn_game_path(@game), method: :post do |f| %>
+    <%= form_with model: @game, url: player_turn_game_path(@game), method: :post do |f| %>
+      <%= f.hidden_field :player_id, value: @current_player.id %>
+
       <div class="flex flex-wrap justify-center gap-2">
         <% board_cards.each_with_index do |player_card, index| %>
           <% unless index.zero? %>
