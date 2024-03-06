@@ -57,13 +57,15 @@ class GamesController < ApplicationController
   def show; end
 
   def player_turn
+    return finish_joker_play if @game.joker_play
+
     @player_card = PlayerCard.find_by(id: game_params[:player_card_id])
 
-    retrieve_cards_to_player
     push_into_parade
+    retrieve_cards_to_player
 
     last_round_conditions? ? last_round : draw_card
-    @game.next_turn!
+    @game.next_turn! unless @game.joker_play
 
     respond_to do |format|
       format.html { redirect_to game_path(@game) }
@@ -99,6 +101,18 @@ class GamesController < ApplicationController
     end
   end
 
+  private def finish_joker_play
+    player_selected_card_ids = params[:player_card_ids]
+    PlayerCard.where(id: player_selected_card_ids).each { |it| it.update!(owner: @player, place: 'Table') }
+    @game.joker_play = false
+    @game.next_turn!
+
+    respond_to do |format|
+      format.html { redirect_to game_path(@game) }
+      format.turbo_stream
+    end
+  end
+
   private def choose_last_two_cards
     # here we need to choose 2 cards and push into table
     # cards.each do |do|
@@ -112,22 +126,13 @@ class GamesController < ApplicationController
 
   private def retrieve_cards_to_player
     card = @player_card.card
-    return joker if card.value.to_i.zero?
-    return if @board.player_cards.length <= card.value.to_i
+    return @game.update!(joker_play: true) if card.value.zero?
+    return if @board.player_cards.length <= card.value
 
     @player_card.compare_card_and_retreive(
       retrievable_board_cards: @board.retrievable_cards(card),
       owner: @player
     )
-  end
-
-  private def joker
-    # here the player could choose any card to be added to his table cards or none
-    # I believe it would need a button to confirm after selecting any cards or none
-
-    # cards.each do |card|
-    #   card.send_to_table(@player)
-    # end
   end
 
   private def all_suits?

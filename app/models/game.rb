@@ -27,6 +27,10 @@ class Game < ApplicationRecord
     "Game #{id}"
   end
 
+  def current_player_turn?(player)
+    turn == player.turn_order && player.game_id == id
+  end
+
   def initialize_game
     initialize_deck
     create_initial_board
@@ -60,7 +64,6 @@ class Game < ApplicationRecord
   def next_turn!
     self.turn += 1
     self.turn = 1 if turn > players.size
-
     save!
   end
 

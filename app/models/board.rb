@@ -7,6 +7,6 @@ class Board < ApplicationRecord
   has_many :cards, through: :player_cards
 
   def retrievable_cards(card)
-    player_cards.ordered[card.value..]
+    player_cards.ordered[(card.value + 1)..]
   end
 end
