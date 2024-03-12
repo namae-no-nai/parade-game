@@ -22,6 +22,16 @@ class Game::PlayerComponent < ApplicationComponent
     current_player? && @game.current_player_turn?(@player)
   end
 
+  def multi_selectable?
+    # return false if @player.is_a?(Board)
+
+    @player.game.last_round? && @player.ready?
+  end
+
+  def last_round?
+    @game.last_round?
+  end
+
   def current_player_border
     'border-green-500' if @game.current_player_turn?(@player)
   end

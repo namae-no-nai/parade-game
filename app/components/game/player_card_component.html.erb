@@ -10,6 +10,12 @@
       </div>
     </button>
   <% end %>
+<% elsif @multi_selectable %>
+  <input type="checkbox" value="<%= @player_card.id %>" name="game[player_cards][]" id="pc-<%= @player_card.id %>">
+  <label for="pc-<%= @player_card.id %>" class="board-card p-1 card border hover:bg-violet-400 hover:cursor-pointer">
+    <p>Suit: <%= @player_card.card.suit %></p>
+    <p>Value: <%= @player_card.card.value %></p>
+  </label>
 <% else %>
   <div class="border p-1">
     <p>Suit: <%= @player_card.suit %></p>

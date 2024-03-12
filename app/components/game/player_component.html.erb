@@ -3,9 +3,20 @@
     <p class="font-bold"> <%= player_name %> </p>
 
     <% if current_player? %>
-      <div class="player-cards flex flex-wrap justify-between gap-2">
-        <%= render(Game::PlayerCardComponent.with_collection(@player.player_cards.on_hand, player: @player, selectable: selectable?)) %>
-      </div>
+
+      <% if last_round? %>
+        <%= form_with model: @player.game, method: :post, url: last_player_turn_game_path(@player.game) do |f| %>
+          <%= f.hidden_field :player_id, value: @player.id %>
+
+          <%= render(Game::PlayerCardComponent.with_collection(@player.player_cards.on_hand, player: @player, multi_selectable: multi_selectable?)) %>
+
+          <%= f.submit 'Finish last round', class: "rounded p-2 bg-lime-500" %>
+        <% end %>
+      <% else %>
+        <div class="player-cards flex flex-wrap justify-between gap-2">
+          <%= render(Game::PlayerCardComponent.with_collection(@player.player_cards.on_hand, player: @player, selectable: selectable?)) %>
+        </div>
+      <% end %>
 
       <br>
     <% end %>

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class GamesController < ApplicationController
-  before_action :set_game, only: %i[show start player_turn choose_last_cards]
+  before_action :set_game, only: %i[show start player_turn choose_last_cards last_player_turn]
   before_action :verify_player_turn, only: %i[player_turn]
   before_action :set_current_player, only: %i[show start player_turn choose_last_cards]
 
@@ -89,6 +89,28 @@ class GamesController < ApplicationController
     end
   end
 
+  def last_player_turn
+    @player = Player.find(game_params[:player_id])
+    PlayerCard.where(id: game_params[:player_cards]).each { |it| it.update!(place: 'Table') }
+    @player.finished!
+
+    if @game.players.all?(&:finished?)
+      @game.finished!
+      return redirect_to game_path(@game)
+    end
+
+    respond_to do |format|
+      format.html { redirect_to game_path(@game) }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(@game, GameComponent.new(game: @game, current_player:))
+      end
+    end
+  end
+
+  def end_game
+    @game = Game.find(params[:id])
+  end
+
   def choose_last_cards
     @player = Player.find(game_params[:player_id])
     player_selected_card_ids = params[:player_card_ids]
@@ -163,6 +185,6 @@ class GamesController < ApplicationController
   end
 
   private def game_params
-    params.require(:game).permit(:card_id, :board_id, :player_id, :player_card_id, players: [])
+    params.require(:game).permit(:card_id, :board_id, :player_id, :player_card_id, players: [], player_cards: [])
   end
 end
