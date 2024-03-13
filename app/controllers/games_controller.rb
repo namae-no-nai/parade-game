@@ -79,14 +79,9 @@ class GamesController < ApplicationController
     end
 
     @game.last_round! if @game.players.all? { |player| player.player_cards.on_hand.size == 4 }
-
     @game.game_logs.create!(player: @player, action: 'played')
-    respond_to do |format|
-      format.html { redirect_to game_path(@game) }
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(@game, GameComponent.new(game: @game, current_player:))
-      end
-    end
+
+    create_response_for_turbo_stream
   end
 
   def last_player_turn
@@ -94,17 +89,11 @@ class GamesController < ApplicationController
     PlayerCard.where(id: game_params[:player_cards]).each { |it| it.update!(place: 'Table') }
     @player.finished!
 
-    if @game.players.all?(&:finished?)
-      @game.finished!
-      return redirect_to game_path(@game)
+    finish_game if @game.players.all?(&:finished?)
+
     end
 
-    respond_to do |format|
-      format.html { redirect_to game_path(@game) }
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(@game, GameComponent.new(game: @game, current_player:))
-      end
-    end
+    create_response_for_turbo_stream
   end
 
   def end_game
@@ -119,21 +108,29 @@ class GamesController < ApplicationController
 
     # redirect_to end_game_path(@game) if @game.players.all?(&:finished?)
 
-    respond_to do |format|
-      format.html { redirect_to game_path(@game) }
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(@game, GameComponent.new(game: @game, current_player:))
-      end
-    end
+    finish_game if @game.players.all?(&:finished?)
+
+    create_response_for_turbo_stream
   end
 
-  private def finish_joker_play
+  private
+
+  def finish_game
+    @game.finished!
+    return redirect_to game_path(@game)
+  end
+
+  def finish_joker_play
     player_selected_card_ids = params[:player_card_ids]
     PlayerCard.where(id: player_selected_card_ids).each { |it| it.update!(owner: @player, place: 'Table') }
     @game.joker_play = false
     @game.next_turn!
     @game.last_rounds! if @game.player_cards.empty? || all_suits?
 
+    create_response_for_turbo_stream
+  end
+
+  def create_response_for_turbo_stream
     respond_to do |format|
       format.html { redirect_to game_path(@game) }
       format.turbo_stream do
@@ -142,11 +139,11 @@ class GamesController < ApplicationController
     end
   end
 
-  private def push_into_parade
+  def push_into_parade
     @player_card.send_to_board(@board)
   end
 
-  private def retrieve_cards_to_player
+  def retrieve_cards_to_player
     card = @player_card.card
     return @game.update!(joker_play: true) if card.value.zero?
     return if @board.player_cards.length <= card.value
@@ -157,34 +154,34 @@ class GamesController < ApplicationController
     )
   end
 
-  private def draw_card
+  def draw_card
     @game.draw_card(@player)
   end
 
-  private def all_suits?
+  def all_suits?
     @player.all_suits?
   end
 
-  private def set_game
+  def set_game
     @game = Game.with_associations(params[:id])
     @players = @game.players.includes(:player_cards)
     @board = @game.board
   end
 
-  private def verify_player_turn
+  def verify_player_turn
     redirect_to game_path(@game), notice: "It's not your turn yet, please wait" unless correct_player?
   end
 
-  private def correct_player?
+  def correct_player?
     @player = @players.find(game_params[:player_id])
     @game.turn == @player.turn_order
   end
 
-  private def player_params
+  def player_params
     params.require(:player).permit(:name)
   end
 
-  private def game_params
+  def game_params
     params.require(:game).permit(:card_id, :board_id, :player_id, :player_card_id, players: [], player_cards: [])
   end
 end
