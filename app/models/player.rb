@@ -26,7 +26,8 @@ class Player < ApplicationRecord
   private
 
   def unique_leader
-    errors.add(:leader, 'already exists') if leader? && game.players.leader.where.not(id:).exists?
+    errors.add(:leader, 'already exists') if leader? &&
+                                             game.players.leader.where.not(id:).exists?
   end
 
   def broadcast_waiting_list

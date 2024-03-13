@@ -12,7 +12,7 @@ class Game < ApplicationRecord
   enum :status, %i[waiting started last_rounds last_round finished]
 
   scope :ordered, -> { order(created_at: :desc) }
-  scope :with_associations, ->(id) {
+  scope :with_associations, lambda { |id|
     includes(:board, :player_cards, players: { player_cards: :card })
       .find(id)
   }
@@ -112,10 +112,10 @@ class Game < ApplicationRecord
   def create_initial_board(deck = cards)
     return if board.present?
 
-    deck_cards = deck.sample(INITIAL_PARADE)
+    drawn_cards = deck.sample(INITIAL_PARADE)
     board = Board.create!(game: self)
-    board.add_cards(deck_cards, 'Board')
+    board.add_cards(drawn_cards, 'Board')
 
-    remove_cards deck_cards
+    remove_cards drawn_cards
   end
 end
