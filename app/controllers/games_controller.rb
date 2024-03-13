@@ -41,12 +41,9 @@ class GamesController < ApplicationController
   def start
     @game = Game.find(params[:id])
     if @game.start_game
-
       respond_to do |format|
         format.html { redirect_to game_path(@game) }
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(@game, GameComponent.new(game: @game, current_player:))
-        end
+        format.turbo_stream { render_game_component }
       end
     else
       render :show, status: :unprocessable_entity
@@ -59,23 +56,9 @@ class GamesController < ApplicationController
     return finish_joker_play if @game.joker_play
 
     @player_card = PlayerCard.find_by(id: game_params[:player_card_id])
+    process_turn_actions
 
-    push_into_parade
-    retrieve_cards_to_player
-
-    if @game.last_rounds?
-      if @game.game_logs.last.player == @player
-        @game.next_turn! unless @game.joker_play
-      else
-        @game.draw_card(@player)
-      end
-    else
-      @game.draw_card(@player)
-      @game.next_turn! unless @game.joker_play
-      @game.last_rounds! if @game.player_cards.empty? || all_suits?
-    end
-
-    @game.last_round! if @game.players.all? { |player| player.player_cards.on_hand.size == 4 }
+    @game.last_round! if last_round_condition_met?
     @game.game_logs.create!(player: @player, action: 'played')
 
     create_response_for_turbo_stream
@@ -109,6 +92,27 @@ class GamesController < ApplicationController
   end
 
   private
+
+  def process_turn_actions
+    push_into_parade
+    retrieve_cards_to_player
+
+    @game.draw_card(@player) unless @game.last_rounds? && @game.game_logs.last.player != @player
+    @game.next_turn! unless @game.joker_play
+    @game.last_rounds! if last_rounds_condition_met?
+  end
+
+  def render_game_component
+    render turbo_stream: turbo_stream.replace(@game, GameComponent.new(game: @game, current_player:))
+  end
+
+  def last_round_condition_met?
+    @game.players.all? { |player| player.player_cards.on_hand.size == 4 }
+  end
+
+  def last_rounds_condition_met?
+    @game.last_rounds? && (@game.player_cards.empty? || all_suits?)
+  end
 
   def finish_game
     @game.finished!
