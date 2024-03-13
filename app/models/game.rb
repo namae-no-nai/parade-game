@@ -69,16 +69,27 @@ class Game < ApplicationRecord
 
   def calculate_scores
     players.map do |player|
-      most_owned_suits = players_most_owned_cards.select { |pmoc| pmoc[:player] == player }.map { |pmoc| pmoc[:suit] }
-      score = player.player_cards.on_table.includes(:card).sum do |pc|
-        most_owned_suits.include?(pc.card.suit) ? 1 : pc.card.value
-      end
-
+      score = calculate_player_score(player)
       { player:, score: }
     end
   end
 
   private
+
+  def calculate_player_score(player)
+    most_owned_suits = most_owned_suits_for_player(player)
+    sum_player_cards_score(player, most_owned_suits)
+  end
+
+  def most_owned_suits_for_player(player)
+    players_most_owned_cards.select { |pmoc| pmoc[:player] == player }.map { |pmoc| pmoc[:suit] }
+  end
+
+  def sum_player_cards_score(player, most_owned_suits)
+    player.player_cards.on_table.includes(:card).sum do |pc|
+      most_owned_suits.include?(pc.card.suit) ? 1 : pc.card.value
+    end
+  end
 
   def broadcast_game_change
     players.each do |player|
