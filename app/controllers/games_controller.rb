@@ -21,14 +21,11 @@ class GamesController < ApplicationController
 
   def create
     @game = Game.new(started_at: Time.current)
-    if @game.save
-      @player = @game.players.new(name: player_params[:name], leader: true, status: :ready)
-      if @player.save
-        create_game_session
-        redirect_to game_path(@game)
-      else
-        render :index, status: :unprocessable_entity
-      end
+    @player = @game.players.build(name: player_params[:name], leader: true, status: :ready)
+
+    if @game.save && @player.save
+      create_game_session
+      redirect_to game_path(@game)
     else
       render :index, status: :unprocessable_entity
     end
@@ -91,8 +88,6 @@ class GamesController < ApplicationController
 
     finish_game if @game.players.all?(&:finished?)
 
-    end
-
     create_response_for_turbo_stream
   end
 
@@ -117,7 +112,7 @@ class GamesController < ApplicationController
 
   def finish_game
     @game.finished!
-    return redirect_to game_path(@game)
+    redirect_to game_path(@game)
   end
 
   def finish_joker_play
