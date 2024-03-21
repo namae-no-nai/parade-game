@@ -86,7 +86,7 @@ class GamesController < ApplicationController
 
     # redirect_to end_game_path(@game) if @game.players.all?(&:finished?)
 
-    finish_game if @game.players.all?(&:finished?)
+    return finish_game if @game.players.all?(&:finished?)
 
     create_response_for_turbo_stream
   end
@@ -97,7 +97,7 @@ class GamesController < ApplicationController
     push_into_parade
     retrieve_cards_to_player
 
-    @game.draw_card(@player) unless @game.last_rounds? && @game.game_logs.last.player != @player
+    @game.draw_card(@player) unless @game.last_rounds?
     @game.next_turn! unless @game.joker_play
     @game.last_rounds! if last_rounds_condition_met?
   end
