@@ -66,27 +66,12 @@ class GamesController < ApplicationController
 
   def last_player_turn
     @player = Player.find(game_params[:player_id])
-    PlayerCard.where(id: game_params[:player_cards]).each { |it| it.update!(place: 'Table') }
-    @player.finished!
 
-    finish_game if @game.players.all?(&:finished?)
-
-    create_response_for_turbo_stream
-  end
-
-  def end_game
-    @game = Game.find(params[:id])
-  end
-
-  def choose_last_cards
-    @player = Player.find(game_params[:player_id])
-    player_selected_card_ids = params[:player_card_ids]
+    player_selected_card_ids = game_params[:player_cards]
     @player.player_cards.where(id: player_selected_card_ids).each { |it| it.update!(place: 'Table') }
+
     @player.finished!
-
-    # redirect_to end_game_path(@game) if @game.players.all?(&:finished?)
-
-    return finish_game if @game.players.all?(&:finished?)
+    @game.finished! if @game.players.reload.all?(&:finished?)
 
     create_response_for_turbo_stream
   end
@@ -102,6 +87,23 @@ class GamesController < ApplicationController
     @game.last_rounds! if last_rounds_condition_met?
   end
 
+  def finish_joker_play
+    player_selected_card_ids = params[:player_card_ids]
+    PlayerCard.where(id: player_selected_card_ids).each { |it| it.update!(owner: @player, place: 'Table') }
+    @game.joker_play = false
+    @game.next_turn!
+    @game.last_rounds! if last_rounds_condition_met?
+
+    create_response_for_turbo_stream
+  end
+
+  def create_response_for_turbo_stream
+    respond_to do |format|
+      format.html { redirect_to game_path(@game) }
+      format.turbo_stream { render_game_component }
+    end
+  end
+
   def render_game_component
     render turbo_stream: turbo_stream.replace(@game, GameComponent.new(game: @game, current_player:))
   end
@@ -111,31 +113,7 @@ class GamesController < ApplicationController
   end
 
   def last_rounds_condition_met?
-    @game.last_rounds? && (@game.player_cards.empty? || all_suits?)
-  end
-
-  def finish_game
-    @game.finished!
-    redirect_to game_path(@game)
-  end
-
-  def finish_joker_play
-    player_selected_card_ids = params[:player_card_ids]
-    PlayerCard.where(id: player_selected_card_ids).each { |it| it.update!(owner: @player, place: 'Table') }
-    @game.joker_play = false
-    @game.next_turn!
-    @game.last_rounds! if @game.player_cards.empty? || all_suits?
-
-    create_response_for_turbo_stream
-  end
-
-  def create_response_for_turbo_stream
-    respond_to do |format|
-      format.html { redirect_to game_path(@game) }
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(@game, GameComponent.new(game: @game, current_player:))
-      end
-    end
+    @game.player_cards.empty? || all_suits?
   end
 
   def push_into_parade
