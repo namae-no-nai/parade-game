@@ -1,0 +1,5 @@
+<turbo-frame id="players">
+  <div class="flex gap-5 flex-wrap justify-evenly">
+    <%= render(Game::PlayerComponent.with_collection(@players, current_player: @current_player)) %>
+  </div>
+</turbo-frame>

@@ -9,10 +9,10 @@ class Game < ApplicationRecord
   has_many :player_cards, as: :owner
   has_many :cards, through: :player_cards
 
-  enum :status, %i[waiting started finished]
+  enum :status, %i[waiting started last_rounds last_round finished]
 
   scope :ordered, -> { order(created_at: :desc) }
-  scope :with_associations, ->(id) {
+  scope :with_associations, lambda { |id|
     includes(:board, :player_cards, players: { player_cards: :card })
       .find(id)
   }
@@ -69,19 +69,32 @@ class Game < ApplicationRecord
 
   def calculate_scores
     players.map do |player|
-      most_owned_suits = players_most_owned_cards.select { |pmoc| pmoc[:player] == player }.map { |pmoc| pmoc[:suit] }
-      score = player.player_cards.on_table.includes(:card).sum do |pc|
-        most_owned_suits.include?(pc.card.suit) ? 1 : pc.card.value
-      end
-
+      score = calculate_player_score(player)
       { player:, score: }
     end
   end
 
   private
 
+  def calculate_player_score(player)
+    most_owned_suits = most_owned_suits_for_player(player)
+    sum_player_cards_score(player, most_owned_suits)
+  end
+
+  def most_owned_suits_for_player(player)
+    players_most_owned_cards.select { |pmoc| pmoc[:player] == player }.map { |pmoc| pmoc[:suit] }
+  end
+
+  def sum_player_cards_score(player, most_owned_suits)
+    player.player_cards.on_table.includes(:card).sum do |pc|
+      most_owned_suits.include?(pc.card.suit) ? 1 : pc.card.value
+    end
+  end
+
   def broadcast_game_change
-    players.each(&:broadcast_game_change)
+    players.each do |player|
+      ::BroadcastGame.send(game: self, current_player: player)
+    end
   end
 
   def players_grouped_cards
@@ -110,10 +123,10 @@ class Game < ApplicationRecord
   def create_initial_board(deck = cards)
     return if board.present?
 
-    deck_cards = deck.sample(INITIAL_PARADE)
+    drawn_cards = deck.sample(INITIAL_PARADE)
     board = Board.create!(game: self)
-    board.add_cards(deck_cards, 'Board')
+    board.add_cards(drawn_cards, 'Board')
 
-    remove_cards deck_cards
+    remove_cards drawn_cards
   end
 end

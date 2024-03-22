@@ -1,0 +1,29 @@
+<div class="flex justify-center m-12">
+  <div class="flex flex-col">
+    <%= render(Game::WaitingPlayersComponent.new(game: @game)) %>
+
+    <% if @current_player.leader? %>
+      <%= form_with url: start_game_path(@game), method: :patch do |f| %>
+        <div class="flex justify-center mt-5">
+          <%= f.submit "Start game", class: "rounded p-2 bg-lime-500 hover:cursor-pointer" %>
+        </div>
+
+        <div class="mt-5">
+          <%= render(ErrorsComponent.new(object: @game)) %>
+        </div>
+      <% end %>
+    <% else %>
+      <% if @current_player.ready? %>
+        <div class="flex justify-center mt-2">
+          <p>Waiting for the leader to start the game...</p>
+        </div>
+      <% else %>
+        <%= form_with model: @current_player, url: ready_game_player_path(@current_player.game_id, @current_player), method: :patch do |f| %>
+          <div class="flex justify-center mt-2">
+            <%= f.submit "Ready", class: "rounded p-2 bg-lime-500 hover:cursor-pointer" %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

@@ -11,47 +11,26 @@ class Player < ApplicationRecord
   has_many :player_cards, as: :owner
   has_many :cards, through: :player_cards
 
-  enum status: %i[waiting ready]
+  enum status: %i[waiting ready finished]
 
   scope :leader, -> { where(leader: true) }
+  scope :ordered, -> { order(turn_order: :asc) }
 
-  after_create_commit :broadcast_new_player
-  after_update_commit :broadcast_player_list_update
+  after_create_commit :broadcast_waiting_list
+  after_update_commit :broadcast_waiting_list
 
   def all_suits?
     player_cards.on_table.group_by(&:suit).count == 6
   end
 
-  def broadcast_game_change
-    broadcast_replace_to(
-      self,
-      target: game,
-      partial: 'games/game',
-      locals: { game:, current_player: self }
-    )
-  end
-
   private
 
   def unique_leader
-    errors.add(:leader, 'already exists') if leader? && game.players.leader.where.not(id:).exists?
+    errors.add(:leader, 'already exists') if leader? &&
+                                             game.players.leader.where.not(id:).exists?
   end
 
-  def broadcast_new_player
-    broadcast_append_to(
-      game,
-      target: 'waiting_list',
-      partial: 'games/waiting_player',
-      locals: { player: self }
-    )
-  end
-
-  def broadcast_player_list_update
-    broadcast_replace_to(
-      game,
-      target: 'waiting_list',
-      partial: 'games/players_list',
-      locals: { game: }
-    )
+  def broadcast_waiting_list
+    ::BroadcastWaitingList.send(game:)
   end
 end

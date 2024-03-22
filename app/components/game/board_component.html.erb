@@ -1,0 +1,28 @@
+<turbo-frame id=<%= dom_id(@game.board)%>>
+  <% if joker_play? %>
+    <%= form_with model: @game, url: player_turn_game_path(@game), method: :post do |f| %>
+      <%= f.hidden_field :player_id, value: @current_player.id %>
+
+      <div class="flex flex-wrap justify-center gap-2">
+        <% board_cards.each_with_index do |player_card, index| %>
+          <% unless index.zero? %>
+            <input type="checkbox" name="player_card_ids[]" id="pc-<%= player_card.id %>" value="<%= player_card.id %>" >
+          <% end %>
+
+          <label for="pc-<%= player_card.id %>" class="board-card p-1 card border hover:bg-violet-400 hover:cursor-pointer">
+            <p>Suit: <%= player_card.card.suit %></p>
+            <p>Value: <%= player_card.card.value %></p>
+          </label>
+        <% end %>
+      </div>
+
+      <div class="flex justify-center mt-5">
+        <%= f.submit 'Finish Joker Play', class: "rounded p-2 bg-green-500 hover:cursor-pointer" %>
+      </div>
+    <% end %>
+  <% else %>
+  <div class="flex flex-wrap justify-center gap-2">
+    <%= render(Game::PlayerCardComponent.with_collection(board_cards, player: @board)) %>
+  </div>
+  <% end %>
+</turbo-frame>

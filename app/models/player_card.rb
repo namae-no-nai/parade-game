@@ -9,8 +9,6 @@ class PlayerCard < ApplicationRecord
   scope :on_hand, -> { where(place: 'Hand') }
   scope :ordered, -> { order(updated_at: :desc) }
 
-  # after_update_commit :broadcast_change
-
   def send_to_board(board)
     update!(owner: board, place: 'Board')
   end
@@ -26,16 +24,5 @@ class PlayerCard < ApplicationRecord
         retrievable_board_card.update!(owner:, place: 'Table')
       end
     end
-  end
-
-  private
-
-  def broadcast_change
-    partial_name = owner_type.downcase
-    locals = {}.tap do |h|
-      h[owner_type.downcase.to_sym] = owner
-    end
-
-    broadcast_replace_to game, target: owner, partial: "games/#{partial_name}", locals:
   end
 end

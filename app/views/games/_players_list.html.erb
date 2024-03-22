@@ -1,5 +1,0 @@
-<%= turbo_frame_tag 'waiting_list' do %>
-  <% game.players.each do |player| %>
-    <%= render partial: 'games/waiting_player', locals: { player: } %>
-  <% end %>
-<% end %>
