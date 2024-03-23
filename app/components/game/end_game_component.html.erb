@@ -1,0 +1,17 @@
+<div class="flex gap-3 justify-center">
+  <% players_scores.each_with_index do |it, index| %>
+    <div class="content-end">
+      <% if index.zero? %>
+        <span class="text-sm text-green-600">Winner</span>
+      <% end %>
+
+      <% if it[:player] == @current_player %>
+        <span class="text-sm">(You)</span>
+      <% end %>
+
+      <div class="p-3 border<%= ' border-green-400' if index.zero? %> w-fit">
+        <%= it[:player].name %> -> <%= it[:score] %>
+      </div>
+    </div>
+  <% end %>
+</div>
