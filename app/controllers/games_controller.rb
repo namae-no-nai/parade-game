@@ -58,7 +58,7 @@ class GamesController < ApplicationController
     @player_card = PlayerCard.find_by(id: game_params[:player_card_id])
     process_turn_actions
 
-    @game.last_round! if last_round_condition_met?
+    @game.last_round! if last_round_condition_met? && !@game.joker_play?
     @game.game_logs.create!(player: @player, action: 'played')
 
     create_response_for_turbo_stream
@@ -93,6 +93,7 @@ class GamesController < ApplicationController
     @game.joker_play = false
     @game.next_turn!
     @game.last_rounds! if last_rounds_condition_met?
+    @game.last_round! if last_round_condition_met?
 
     create_response_for_turbo_stream
   end
@@ -109,7 +110,7 @@ class GamesController < ApplicationController
   end
 
   def last_round_condition_met?
-    @game.players.all? { |player| player.player_cards.on_hand.size == 4 }
+    @game.players.all? { |player| player.player_cards.on_hand.size <= 4 }
   end
 
   def last_rounds_condition_met?
